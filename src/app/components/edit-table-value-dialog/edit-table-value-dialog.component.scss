@@ -1,0 +1,13 @@
+.dialogContainer {
+  color: #fff;
+
+  .content {
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+
+    .error {
+      color: red;
+    }
+  }
+}
