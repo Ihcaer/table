@@ -5,7 +5,12 @@
   <div mat-dialog-content class="content">
     <mat-form-field>
       <mat-label>{{ data.column }}</mat-label>
-      <input matInput [(ngModel)]="updatedValue" required />
+      <input
+        matInput
+        [(ngModel)]="updatedValue"
+        (ngModelChange)="onValueChange()"
+        required
+      />
       @if(updatedValue === '' || updatedValue === 0){
       <mat-error>Value cannot be null</mat-error>
       }
@@ -14,6 +19,8 @@
     <span class="error">Value is the same</span>
     } @if(takenValue){
     <span class="error">Value is taken</span>
+    } @if(invalidNumber){
+    <span class="error">Value must be a number</span>
     }
   </div>
   <div mat-dialog-actions>

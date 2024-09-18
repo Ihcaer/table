@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip'
@@ -36,14 +36,15 @@ const ELEMENT_DATA: PeriodicElement[] = [
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
+  public dialog = inject(MatDialog);
+  private cdr = inject(ChangeDetectorRef);
+
   displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
   dataSource = new MatTableDataSource<PeriodicElement>(ELEMENT_DATA);
 
   loaded: boolean = false;
   loading: boolean = false;
   tooltipText: string = 'Click to change value';
-
-  constructor(public dialog: MatDialog, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.simulateDataFetch();
@@ -69,10 +70,10 @@ export class AppComponent implements OnInit {
 
   applyFilter(event: Event) {
     this.loading = true;
-    const filterValue = (event.target as HTMLInputElement).value;
 
     setTimeout(() => {
       this.loading = false;
+      const filterValue = (event.target as HTMLInputElement).value;
       this.dataSource.filter = filterValue.trim().toLowerCase();
     }, 2000);
   }

@@ -13,13 +13,20 @@ import { PeriodicElement } from '../../app.component';
   styleUrl: './edit-table-value-dialog.component.scss',
 })
 export class EditTableValueDialogComponent {
-  updatedValue!: string | number;
+  public dialogRef = inject(MatDialogRef<EditTableValueDialogComponent>);
+  updatedValue: string | number;
   sameValue: boolean = false;
   takenValue: boolean = false;
-  public dialogRef = inject(MatDialogRef<EditTableValueDialogComponent>);
+  invalidNumber: boolean = false;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: { column: string, name: string, value: string | number, dataSource: PeriodicElement[] }) {
     this.updatedValue = data.value;
+  }
+
+  onValueChange() {
+    this.sameValue = false;
+    this.takenValue = false;
+    this.invalidNumber = false;
   }
 
   save() {
@@ -35,6 +42,11 @@ export class EditTableValueDialogComponent {
       return
     } else if (this.updatedValue === this.data.value) {
       this.sameValue = true;
+    } else if (typeof this.updatedValue === 'number') {
+      if (isNaN(this.updatedValue)) {
+        this.invalidNumber = true;
+        this.updatedValue = '';
+      }
     }
     else if (this.data.dataSource.some(el => el.position === this.updatedValue)) {
       this.takenValue = true;
