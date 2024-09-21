@@ -3,7 +3,11 @@
     <mat-label>Filter</mat-label>
     <input matInput (keyup)="applyFilter($event)" #input />
   </mat-form-field>
-  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+  <table
+    mat-table
+    [dataSource]="filteredData$ | async"
+    class="mat-elevation-z8"
+  >
     <ng-container matColumnDef="position">
       <th mat-header-cell *matHeaderCellDef>Number</th>
       <td

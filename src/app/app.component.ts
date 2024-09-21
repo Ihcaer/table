@@ -1,46 +1,43 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { CommonModule } from '@angular/common';
+import { MatTableModule } from '@angular/material/table';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip'
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { EditTableValueDialogComponent } from './components/edit-table-value-dialog/edit-table-value-dialog.component';
-
-export interface PeriodicElement {
-  [key: string]: any;
-  position: number;
-  name: string;
-  weight: number;
-  symbol: string;
-}
-
-const ELEMENT_DATA: PeriodicElement[] = [
-  { position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H' },
-  { position: 2, name: 'Helium', weight: 4.0026, symbol: 'He' },
-  { position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li' },
-  { position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be' },
-  { position: 5, name: 'Boron', weight: 10.811, symbol: 'B' },
-  { position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C' },
-  { position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N' },
-  { position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O' },
-  { position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F' },
-  { position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne' },
-];
+import { PeriodicElement } from './interfaces/periodic-element';
+import { TableService } from './services/table/table.service';
+import { RxState } from '@rx-angular/state';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [MatTableModule, MatProgressBarModule, MatTooltipModule, MatFormFieldModule, MatInputModule],
+  imports: [CommonModule, MatTableModule, MatProgressBarModule, MatTooltipModule, MatFormFieldModule, MatInputModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
+  providers: [RxState]
 })
 export class AppComponent implements OnInit {
   public dialog = inject(MatDialog);
   private cdr = inject(ChangeDetectorRef);
+  private tableService = inject(TableService);
+  private state = inject(RxState<{ elements: PeriodicElement[], filter: string }>);
 
   displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
-  dataSource = new MatTableDataSource<PeriodicElement>(ELEMENT_DATA);
+
+  filteredData$ = this.state.select(
+    map(({ elements, filter }) =>
+      elements.filter((element: any) =>
+        element.position.toString().includes(filter.toLowerCase()) ||
+        element.name.toLowerCase().includes(filter.toLowerCase()) ||
+        element.weight.toString().includes(filter.toLowerCase()) ||
+        element.symbol.toLowerCase().includes(filter.toLowerCase())
+      )
+    )
+  );
 
   loaded: boolean = false;
   loading: boolean = false;
@@ -48,6 +45,9 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.simulateDataFetch();
+    this.tableService.loadElements();
+    this.state.connect('elements', this.tableService.data$);
+    this.state.set({ filter: '' });
   }
 
   simulateDataFetch() {
@@ -58,13 +58,8 @@ export class AppComponent implements OnInit {
   }
 
   openDialog(column: string, name: string, value: any, element: PeriodicElement) {
-    const dialogRef = this.dialog.open(EditTableValueDialogComponent, { data: { column, name, value, element, dataSource: this.dataSource.data } });
-    dialogRef.afterClosed().subscribe(result => {
-      if (result !== undefined) {
-        element[column] = result;
-        this.dataSource.data.sort((a, b) => a.position - b.position);
-        this.dataSource.data = [...this.dataSource.data];
-      }
+    this.dialog.open(EditTableValueDialogComponent, {
+      data: { column, name, value, element, dataSource: this.state.get().elements }
     });
   }
 
@@ -74,7 +69,7 @@ export class AppComponent implements OnInit {
     setTimeout(() => {
       this.loading = false;
       const filterValue = (event.target as HTMLInputElement).value;
-      this.dataSource.filter = filterValue.trim().toLowerCase();
+      this.state.set({ filter: filterValue.trim().toLowerCase() });
     }, 2000);
   }
 }
