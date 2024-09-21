@@ -1,7 +1,5 @@
 <div class="dialogContainer">
-  <h2 mat-dialog-title>
-    Change current {{ data.column }} value of {{ data.name }}
-  </h2>
+  <h2 mat-dialog-title>Change current {{ data.column }} of {{ data.name }}</h2>
   <div mat-dialog-content class="content">
     <mat-form-field>
       <mat-label>{{ data.column }}</mat-label>
@@ -21,6 +19,8 @@
     <span class="error">Value is taken</span>
     } @if(invalidNumber){
     <span class="error">Value must be a number</span>
+    } @if(positionZero){
+    <span class="error">Position cannot be zero</span>
     }
   </div>
   <div mat-dialog-actions>
