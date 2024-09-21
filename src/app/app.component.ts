@@ -9,14 +9,13 @@ import { MatInputModule } from '@angular/material/input';
 import { EditTableValueDialogComponent } from './components/edit-table-value-dialog/edit-table-value-dialog.component';
 import { PeriodicElement } from './interfaces/periodic-element';
 import { TableService } from './services/table/table.service';
-import { RxLet } from '@rx-angular/template/let';
 import { RxState } from '@rx-angular/state';
 import { map } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, MatTableModule, MatProgressBarModule, MatTooltipModule, MatFormFieldModule, MatInputModule, RxLet],
+  imports: [CommonModule, MatTableModule, MatProgressBarModule, MatTooltipModule, MatFormFieldModule, MatInputModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   providers: [RxState]
